@@ -42,6 +42,7 @@ public class ConcurentCommitChangesTest extends BaseTest {
 	    private ProjectId projectId;
 
 	    private LocalHttpClient guest;
+	    private LocalHttpClient manager;
 	    
 	    
 
@@ -56,7 +57,7 @@ public class ConcurentCommitChangesTest extends BaseTest {
 	        projectId = f.getProjectId("pizza-" + System.currentTimeMillis()); // currentTimeMilis() for uniqueness
 	        Name projectName = f.getName("Pizza Project");
 	        Description description = f.getDescription("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-	        UserId owner = f.getUserId("root");
+	        UserId owner = f.getUserId("bob");
 	        Optional<ProjectOptions> options = Optional.ofNullable(null);
 	        
 	        Project proj = f.getProject(projectId, projectName, description, owner, options);
@@ -69,9 +70,17 @@ public class ConcurentCommitChangesTest extends BaseTest {
 	        return getAdmin().buildVersionedOntology(serverDocument, owlManager, projectId);
 	    }
 	    
+	    private VersionedOWLOntology openProjectAsManager() throws Exception {
+	    	UserId managerId = f.getUserId("bob");
+	        PlainPassword managerPassword = f.getPlainPassword("bob");
+	        this.manager = login(managerId, managerPassword);
+	        ServerDocument serverDocument = manager.openProject(projectId);
+	        return manager.buildVersionedOntology(serverDocument, owlManager, projectId);
+	    }
+	    
 	    @Test
 	    public void shouldCommitAddition() throws Exception {
-	        VersionedOWLOntology vont = openProjectAsAdmin();
+	        VersionedOWLOntology vont = openProjectAsManager();
 	        OWLOntology workingOntology = vont.getOntology();
 	        
 	        
@@ -93,7 +102,7 @@ public class ConcurentCommitChangesTest extends BaseTest {
 	         * Prepare the commit bundle
 	         */
 	        List<OWLOntologyChange> changes = ClientUtils.getUncommittedChanges(histManager, vont.getOntology(), vont.getChangeHistory());
-	        Commit commit = ClientUtils.createCommit(getAdmin(), "Add customer subclass of domain concept", changes);
+	        Commit commit = ClientUtils.createCommit(manager, "Add customer subclass of domain concept", changes);
 	        DocumentRevision commitBaseRevision = vont.getHeadRevision();
 	        CommitBundle commitBundle = new CommitBundleImpl(commitBaseRevision, commit);
 	        
@@ -104,7 +113,7 @@ public class ConcurentCommitChangesTest extends BaseTest {
 				@Override
 				public ChangeHistory call() throws Exception {
 					// TODO Auto-generated method stub
-					return getAdmin().commit(projectId, commitBundle);
+					return manager.commit(projectId, commitBundle);
 				}
 	        	
 	        });
@@ -118,7 +127,7 @@ public class ConcurentCommitChangesTest extends BaseTest {
 				@Override
 				public ChangeHistory call() throws Exception {
 					// TODO Auto-generated method stub
-					return getAdmin().commit(projectId, commitBundle);
+					return manager.commit(projectId, commitBundle);
 				}
 	        	
 	        });
@@ -149,7 +158,7 @@ public class ConcurentCommitChangesTest extends BaseTest {
 	        
 	        
 	        if (expected != null) {
-	        	assertThat(expected.getCause().getMessage(), is("The local copy is outdated. Please do update."));
+	        	assertThat(expected.getCause().getMessage(), is("Commit failed, please update your local copy first"));
 	        } else {
 	        	// we should have gotten an exception
 	        	assertThat(1 + 1, is(3));
@@ -177,7 +186,7 @@ public class ConcurentCommitChangesTest extends BaseTest {
 	        assertThat(changeHistoryFromClient.getRevisions().size(), is(1));
 	        assertThat(changeHistoryFromClient.getChangesForRevision(R1).size(), is(2));
 	        
-	        ChangeHistory changeHistoryFromServer = ((LocalHttpClient)getAdmin()).getAllChanges(vont.getServerDocument());
+	        ChangeHistory changeHistoryFromServer = ((LocalHttpClient) manager).getAllChanges(vont.getServerDocument());
 	        
 	        // Assert the remote change history
 	        assertThat("The remote change history should not be empty", !changeHistoryFromServer.isEmpty());

@@ -23,6 +23,7 @@ import java.util.UUID;
 
 public abstract class BaseTest {
 
+    protected static final String ADMIN_SERVER_ADDRESS = "http://localhost:8081";
     protected static final String SERVER_ADDRESS = "http://localhost:8080";
 
     protected static final DocumentRevision R0 = DocumentRevision.START_REVISION;
@@ -83,9 +84,9 @@ public abstract class BaseTest {
 
     @Before
     public void connectToServer() throws Exception {
-        UserId userId = f.getUserId("root");
-        PlainPassword password = f.getPlainPassword("rootpwd");
-        admin = login(userId, password);
+        UserId userId = f.getUserId("bob");
+        PlainPassword password = f.getPlainPassword("bob");
+        admin = login_admin(userId, password);
     }
     
    
@@ -108,8 +109,13 @@ public abstract class BaseTest {
     }
 
     protected static LocalHttpClient login(UserId userId, PlainPassword password) throws Exception {
-        
-        return new LocalHttpClient(userId.get(), password.getPassword(), SERVER_ADDRESS);
+
+    	return new LocalHttpClient(userId.get(), password.getPassword(), SERVER_ADDRESS);
+    }
+
+    protected static LocalHttpClient login_admin(UserId userId, PlainPassword password) throws Exception {
+
+    	return new LocalHttpClient(userId.get(), password.getPassword(), ADMIN_SERVER_ADDRESS);
     }
 
     protected static String uuid8char() {
