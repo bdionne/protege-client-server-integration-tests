@@ -4,6 +4,7 @@ import edu.stanford.protege.metaproject.ConfigurationManager;
 import edu.stanford.protege.metaproject.api.PlainPassword;
 import edu.stanford.protege.metaproject.api.PolicyFactory;
 import edu.stanford.protege.metaproject.api.UserId;
+import org.apache.log4j.BasicConfigurator;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.AfterClass;
@@ -96,7 +97,8 @@ public abstract class BaseTest {
     	
     	File f = new File(cfn);
     	boolean bool = f.exists();
-    	
+
+    	BasicConfigurator.configure();
     	httpServer = new HTTPServer(cfn);
     	httpServer.start();
     	
