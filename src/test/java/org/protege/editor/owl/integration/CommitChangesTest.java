@@ -1,17 +1,13 @@
 package org.protege.editor.owl.integration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Declaration;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.IRI;
-import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.SubClassOf;
-
+import edu.stanford.protege.metaproject.api.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.protege.editor.owl.client.LocalHttpClient;
-import org.protege.editor.owl.client.api.Client;
 import org.protege.editor.owl.client.api.exception.ClientRequestException;
-import org.protege.editor.owl.server.api.exception.OperationNotAllowedException;
-import org.protege.editor.owl.client.util.ChangeUtils;
 import org.protege.editor.owl.client.util.ClientUtils;
 import org.protege.editor.owl.server.api.CommitBundle;
 import org.protege.editor.owl.server.policy.CommitBundleImpl;
@@ -20,37 +16,15 @@ import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.protege.editor.owl.server.versioning.api.ServerDocument;
 import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationSubject;
-import org.semanticweb.owlapi.model.OWLAnnotationValue;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-import org.semanticweb.owlapi.model.RemoveAxiom;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import edu.stanford.protege.metaproject.api.Description;
-import edu.stanford.protege.metaproject.api.Name;
-import edu.stanford.protege.metaproject.api.PlainPassword;
-import edu.stanford.protege.metaproject.api.Project;
-import edu.stanford.protege.metaproject.api.ProjectId;
-import edu.stanford.protege.metaproject.api.ProjectOptions;
-import edu.stanford.protege.metaproject.api.UserId;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
 /**
  * @author Josef Hardi <johardi@stanford.edu> <br>
@@ -67,6 +41,7 @@ public class CommitChangesTest extends BaseTest {
     private ProjectId projectId;
 
     private LocalHttpClient guest;
+    private LocalHttpClient manager;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -79,17 +54,20 @@ public class CommitChangesTest extends BaseTest {
         projectId = f.getProjectId("pizza-" + System.currentTimeMillis()); // currentTimeMilis() for uniqueness
         Name projectName = f.getName("Pizza Project");
         Description description = f.getDescription("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-        UserId owner = f.getUserId("root");
+        UserId owner = f.getUserId("bob");
         Optional<ProjectOptions> options = Optional.ofNullable(null);
         
-        Project proj = f.getProject(projectId, projectName, description, PizzaOntology.getResource(), owner, options);
+        Project proj = f.getProject(projectId, projectName, description, owner, options);
        
-        getAdmin().createProject(proj);
+        getAdmin().createProject(proj, PizzaOntology.getResource());
     }
 
-    private VersionedOWLOntology openProjectAsAdmin() throws Exception {
-        ServerDocument serverDocument = getAdmin().openProject(projectId);
-        return getAdmin().buildVersionedOntology(serverDocument, owlManager, projectId);
+    private VersionedOWLOntology openProjectAsManager() throws Exception {
+    	UserId managerId = f.getUserId("bob");
+        PlainPassword managerPassword = f.getPlainPassword("bob");
+        this.manager = login(managerId, managerPassword);
+        ServerDocument serverDocument = manager.openProject(projectId);
+        return manager.buildVersionedOntology(serverDocument, owlManager, projectId);
     }
 
     private VersionedOWLOntology openProjectAsGuest() throws Exception {
@@ -102,13 +80,13 @@ public class CommitChangesTest extends BaseTest {
 
     @Test
     public void shouldCommitAddition() throws Exception {
-        VersionedOWLOntology vont = openProjectAsAdmin();
+        VersionedOWLOntology vont = openProjectAsManager();
         OWLOntology workingOntology = vont.getOntology();
         
         /*
          * Simulates user edits over a working ontology (add axioms)
          */
-        List<OWLOntologyChange> cs = new ArrayList<OWLOntologyChange>();
+        List<OWLOntologyChange> cs = new ArrayList<>();
         cs.add(new AddAxiom(workingOntology, Declaration(CUSTOMER)));
         cs.add(new AddAxiom(workingOntology, SubClassOf(CUSTOMER, DOMAIN_CONCEPT)));
         
@@ -129,7 +107,7 @@ public class CommitChangesTest extends BaseTest {
         /*
          * Do commit
          */
-        ChangeHistory approvedChanges = getAdmin().commit(projectId, commitBundle);
+        ChangeHistory approvedChanges = manager.commit(projectId, commitBundle);
         
         /*
          * Update local history
@@ -146,7 +124,7 @@ public class CommitChangesTest extends BaseTest {
         assertThat(changeHistoryFromClient.getRevisions().size(), is(1));
         assertThat(changeHistoryFromClient.getChangesForRevision(R1).size(), is(2));
         
-        ChangeHistory changeHistoryFromServer = ((LocalHttpClient)getAdmin()).getAllChanges(vont.getServerDocument());
+        ChangeHistory changeHistoryFromServer = ((LocalHttpClient) manager).getAllChanges(vont.getServerDocument());
         
         // Assert the remote change history
         assertThat("The remote change history should not be empty", !changeHistoryFromServer.isEmpty());
@@ -159,7 +137,7 @@ public class CommitChangesTest extends BaseTest {
 
     @Test
     public void shouldCommitDeletion() throws Exception {
-        VersionedOWLOntology vont = openProjectAsAdmin();
+        VersionedOWLOntology vont = openProjectAsManager();
         OWLOntology workingOntology = vont.getOntology();
         
         /*
@@ -203,7 +181,7 @@ public class CommitChangesTest extends BaseTest {
         /*
          * Do commit
          */
-        ChangeHistory approvedChanges = getAdmin().commit(projectId, commitBundle);
+        ChangeHistory approvedChanges = manager.commit(projectId, commitBundle);
         
         /*
          * Update local history
@@ -220,7 +198,7 @@ public class CommitChangesTest extends BaseTest {
         assertThat(changeHistoryFromClient.getRevisions().size(), is(1));
         assertThat(changeHistoryFromClient.getChangesForRevision(R1).size(), is(16));
         
-        ChangeHistory changeHistoryFromServer = ((LocalHttpClient)getAdmin()).getAllChanges(vont.getServerDocument());
+        ChangeHistory changeHistoryFromServer = ((LocalHttpClient) manager).getAllChanges(vont.getServerDocument());
         
         // Assert the remote change history
         assertThat("The remote change history should not be empty", !changeHistoryFromServer.isEmpty());

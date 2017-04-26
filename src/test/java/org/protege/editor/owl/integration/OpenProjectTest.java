@@ -1,38 +1,21 @@
 package org.protege.editor.owl.integration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
-import org.protege.editor.owl.client.LocalHttpClient;
-import org.protege.editor.owl.client.api.Client;
-import org.protege.editor.owl.client.util.ChangeUtils;
-import org.protege.editor.owl.client.util.ClientUtils;
-import org.protege.editor.owl.integration.BaseTest.PizzaOntology;
-import org.protege.editor.owl.server.api.CommitBundle;
-import org.protege.editor.owl.server.policy.CommitBundleImpl;
-import org.protege.editor.owl.server.versioning.Commit;
-import org.protege.editor.owl.server.versioning.api.ChangeHistory;
-import org.protege.editor.owl.server.versioning.api.ServerDocument;
-import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
-
+import edu.stanford.protege.metaproject.api.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.protege.editor.owl.client.LocalHttpClient;
+import org.protege.editor.owl.client.api.Client;
+import org.protege.editor.owl.server.versioning.api.ChangeHistory;
+import org.protege.editor.owl.server.versioning.api.ServerDocument;
+import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
 
-import java.util.List;
 import java.util.Optional;
 
-import edu.stanford.protege.metaproject.api.Description;
-import edu.stanford.protege.metaproject.api.Name;
-import edu.stanford.protege.metaproject.api.PlainPassword;
-import edu.stanford.protege.metaproject.api.Project;
-import edu.stanford.protege.metaproject.api.ProjectId;
-import edu.stanford.protege.metaproject.api.ProjectOptions;
-import edu.stanford.protege.metaproject.api.UserId;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 /**
  * @author Josef Hardi <johardi@stanford.edu> <br>
@@ -53,9 +36,9 @@ public class OpenProjectTest extends BaseTest {
         UserId owner = f.getUserId("root");
         Optional<ProjectOptions> options = Optional.ofNullable(null);
         
-        Project proj = f.getProject(projectId, projectName, description, PizzaOntology.getResource(), owner, options);
+        Project proj = f.getProject(projectId, projectName, description, owner, options);
        
-        getAdmin().createProject(proj);
+        getAdmin().createProject(proj, PizzaOntology.getResource());
     }
 
     @Test
