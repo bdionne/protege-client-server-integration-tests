@@ -1,35 +1,17 @@
 package org.protege.editor.owl.integration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
-import org.protege.editor.owl.client.LocalHttpClient;
-import org.protege.editor.owl.client.util.ChangeUtils;
-import org.protege.editor.owl.client.util.ClientUtils;
-import org.protege.editor.owl.integration.BaseTest.PizzaOntology;
-import org.protege.editor.owl.server.api.CommitBundle;
-import org.protege.editor.owl.server.policy.CommitBundleImpl;
-import org.protege.editor.owl.server.versioning.Commit;
+import edu.stanford.protege.metaproject.api.*;
+import org.junit.After;
+import org.junit.Test;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.ServerDocument;
 
-import org.junit.After;
-import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyChange;
-
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
-import edu.stanford.protege.metaproject.api.Description;
-import edu.stanford.protege.metaproject.api.Name;
-import edu.stanford.protege.metaproject.api.Project;
-import edu.stanford.protege.metaproject.api.ProjectId;
-import edu.stanford.protege.metaproject.api.ProjectOptions;
-import edu.stanford.protege.metaproject.api.UserId;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * @author Josef Hardi <johardi@stanford.edu> <br>
@@ -51,9 +33,9 @@ public class NewProjectTest extends BaseTest {
         
         Optional<ProjectOptions> options = Optional.ofNullable(null);
         
-        Project proj = f.getProject(projectId, projectName, description, PizzaOntology.getResource(), owner, options);
+        Project proj = f.getProject(projectId, projectName, description, owner, options);
        
-        ServerDocument serverDocument = getAdmin().createProject(proj);
+        ServerDocument serverDocument = getAdmin().createProject(proj, PizzaOntology.getResource());
         
         // Assert the server document
         assertThat(serverDocument, is(notNullValue()));
@@ -61,7 +43,9 @@ public class NewProjectTest extends BaseTest {
         assertThat(serverDocument.getHistoryFile(), is(notNullValue()));
         
         // Assert the remote change history
-        ChangeHistory remoteChangeHistory = getAdmin().getAllChanges(serverDocument);
+			UserId managerId = f.getUserId("bob");
+			PlainPassword managerPassword = f.getPlainPassword("bob");
+        ChangeHistory remoteChangeHistory = login(managerId, managerPassword).getAllChanges(serverDocument);
         assertThat("The remote change history should be empty", remoteChangeHistory.isEmpty());
         assertThat(remoteChangeHistory.getBaseRevision(), is(R0));
         assertThat(remoteChangeHistory.getHeadRevision(), is(R0));
