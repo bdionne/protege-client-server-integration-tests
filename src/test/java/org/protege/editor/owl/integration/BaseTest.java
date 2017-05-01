@@ -93,8 +93,10 @@ public abstract class BaseTest {
    
     @BeforeClass
     public static void startServer() throws Exception {
+    	File f = new File(BaseTest.class.getResource("/server-configuration.json").toURI());
+    	
     	BasicConfigurator.configure();
-    	httpServer = new HTTPServer();
+    	httpServer = new HTTPServer(f.getAbsolutePath());
     	httpServer.start();
     }
 
