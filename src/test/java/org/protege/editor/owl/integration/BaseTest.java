@@ -93,17 +93,10 @@ public abstract class BaseTest {
    
     @BeforeClass
     public static void startServer() throws Exception {
-    	String cfn = "server-configuration.json";
-    	
-    	File f = new File(cfn);
-    	boolean bool = f.exists();
-
     	BasicConfigurator.configure();
-    	httpServer = new HTTPServer(cfn);
+    	httpServer = new HTTPServer();
     	httpServer.start();
-    	
     }
-    
 
 
     protected LocalHttpClient getAdmin() {
