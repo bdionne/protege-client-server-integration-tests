@@ -68,7 +68,7 @@ public abstract class BaseTest {
 
         static final File getResource() {
             try {
-                return new File(NewProjectTest.class.getResource("/thesaurus.owl").toURI());
+                return new File(NewProjectTest.class.getResource("/thesaurus.owl.zip").toURI());
             }
             catch (URISyntaxException e) {
                 throw new OWLRuntimeException("File not found", e);
