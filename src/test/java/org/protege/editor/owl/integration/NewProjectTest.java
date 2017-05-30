@@ -3,6 +3,7 @@ package org.protege.editor.owl.integration;
 import edu.stanford.protege.metaproject.api.*;
 import org.junit.After;
 import org.junit.Test;
+import org.protege.editor.owl.client.LocalHttpClient;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.ServerDocument;
 
@@ -45,7 +46,9 @@ public class NewProjectTest extends BaseTest {
         // Assert the remote change history
 			UserId managerId = f.getUserId("bob");
 			PlainPassword managerPassword = f.getPlainPassword("bob");
-        ChangeHistory remoteChangeHistory = login(managerId, managerPassword).getAllChanges(serverDocument);
+			LocalHttpClient login = login(managerId, managerPassword);
+			login.setProjectId(projectId);
+			ChangeHistory remoteChangeHistory = login.getAllChanges(serverDocument);
         assertThat("The remote change history should be empty", remoteChangeHistory.isEmpty());
         assertThat(remoteChangeHistory.getBaseRevision(), is(R0));
         assertThat(remoteChangeHistory.getHeadRevision(), is(R0));

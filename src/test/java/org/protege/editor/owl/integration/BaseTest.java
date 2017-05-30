@@ -115,12 +115,7 @@ public abstract class BaseTest {
     	return new LocalHttpClient(userId.get(), password.getPassword(), ADMIN_SERVER_ADDRESS);
     }
 
-    protected static String uuid8char() {
-        final UUID uuid = UUID.randomUUID();
-        return uuid.toString().replace("-", "").substring(0, 8);
-    }
-
-    protected static class CauseMatcher extends TypeSafeMatcher<Throwable> {
+	protected static class CauseMatcher extends TypeSafeMatcher<Throwable> {
         
         private final Class<? extends Throwable> type;
         private final String expectedMessage;
