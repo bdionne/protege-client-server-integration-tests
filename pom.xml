@@ -81,7 +81,7 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <systemPropertyVariables>
-                <org.protege.owl.server.configuration>server-configuration.json</org.protege.owl.server.configuration>
+                <org.protege.owl.server.configuration>${project.build.testOutputDirectory}/server-configuration.json</org.protege.owl.server.configuration>
               </systemPropertyVariables>
             </configuration>
           </plugin>
