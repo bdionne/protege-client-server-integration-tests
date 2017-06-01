@@ -1,7 +1,5 @@
 package org.protege.editor.owl.integration;
 
-import edu.stanford.protege.metaproject.api.PlainPassword;
-import edu.stanford.protege.metaproject.api.UserId;
 import org.junit.Test;
 import org.protege.editor.owl.client.LocalHttpClient;
 
@@ -15,5 +13,11 @@ public class PauseServerTest extends BaseTest {
 		LocalHttpClient client = login(f.getUserId("bob"), f.getPlainPassword("bob"));
 		client.pauseServer();
 		client.resumeServer();
+	}
+
+	@Test(expected = Exception.class)
+	public void pauseLocksToUser() throws Exception {
+		login(f.getUserId("bob"), f.getPlainPassword("bob")).pauseServer();
+		login(f.getUserId("alice"), f.getPlainPassword("alice")).resumeServer();
 	}
 }
