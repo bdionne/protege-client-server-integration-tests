@@ -10,14 +10,14 @@ public class PauseServerTest extends BaseTest {
 
 	@Test
 	public void unpauseServerSucceeds() throws Exception {
-		LocalHttpClient client = login(f.getUserId("bob"), f.getPlainPassword("bob"));
+		LocalHttpClient client = client("bob");
 		client.pauseServer();
 		client.resumeServer();
 	}
 
 	@Test(expected = Exception.class)
 	public void pauseLocksToUser() throws Exception {
-		login(f.getUserId("bob"), f.getPlainPassword("bob")).pauseServer();
-		login(f.getUserId("alice"), f.getPlainPassword("alice")).resumeServer();
+		client("bob").pauseServer();
+		client("alice").resumeServer();
 	}
 }
