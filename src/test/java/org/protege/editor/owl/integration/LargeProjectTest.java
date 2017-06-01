@@ -57,9 +57,7 @@ public class LargeProjectTest extends BaseTest {
         /*
          * Login as Guest
          */
-        UserId guestId = f.getUserId("guest");
-        PlainPassword guestPassword = f.getPlainPassword("guestpwd");
-        Client guest = login(guestId, guestPassword);
+        Client guest = client("guest");
         
         ServerDocument serverDocument = guest.openProject(projectId);
         VersionedOWLOntology vont = ((LocalHttpClient) guest).buildVersionedOntology(serverDocument, owlManager, projectId);

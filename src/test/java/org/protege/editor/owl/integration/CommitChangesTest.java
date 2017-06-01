@@ -69,9 +69,7 @@ public class CommitChangesTest extends BaseTest {
     }
 
     private VersionedOWLOntology openProjectAsGuest() throws Exception {
-        UserId guestId = f.getUserId("guest");
-        PlainPassword guestPassword = f.getPlainPassword("guestpwd");
-        guest = login(guestId, guestPassword);
+        guest = client("guest");
         ServerDocument serverDocument = guest.openProject(projectId);
         return guest.buildVersionedOntology(serverDocument, owlManager, projectId);
     }

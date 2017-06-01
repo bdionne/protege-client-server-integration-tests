@@ -85,7 +85,7 @@ public abstract class BaseTest {
 
     public LocalHttpClient client(String user) {
 			UserId userId = f.getUserId(user);
-			PlainPassword password = f.getPlainPassword(user);
+			PlainPassword password = f.getPlainPassword("guest".equals(user) ? "guestpwd" : user);
 			try {
 				return login(userId, password);
 			} catch (Exception e) {
