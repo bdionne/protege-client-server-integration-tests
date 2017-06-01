@@ -46,9 +46,7 @@ public class OpenProjectTest extends BaseTest {
         /*
          * Login as Guest
          */
-        UserId guestId = f.getUserId("guest");
-        PlainPassword guestPassword = f.getPlainPassword("guestpwd");
-        LocalHttpClient guest = login(guestId, guestPassword);
+        LocalHttpClient guest = client("guest");
         
         ServerDocument serverDocument = guest.openProject(projectId);
         VersionedOWLOntology vont = guest.buildVersionedOntology(serverDocument, owlManager, projectId);
@@ -76,9 +74,7 @@ public class OpenProjectTest extends BaseTest {
         /*
          * Login as Guest
          */
-        UserId guestId = f.getUserId("guest");
-        PlainPassword guestPassword = f.getPlainPassword("guestpwd");
-        Client guest = login(guestId, guestPassword);
+        Client guest = client("guest");
         
         ServerDocument serverDocument = guest.openProject(projectId);
         VersionedOWLOntology vont = ((LocalHttpClient) guest).buildVersionedOntology(serverDocument, owlManager, projectId);
