@@ -20,7 +20,6 @@ import org.semanticweb.owlapi.model.OWLRuntimeException;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.UUID;
 
 public abstract class BaseTest {
 
@@ -95,9 +94,8 @@ public abstract class BaseTest {
 
     @Before
     public void connectToServer() throws Exception {
-        UserId userId = f.getUserId("bob");
-        PlainPassword password = f.getPlainPassword("bob");
-        admin = login_admin(userId, password);
+			admin = new LocalHttpClient(f.getUserId("bob").get(), f.getPlainPassword("bob").getPassword(),
+				ADMIN_SERVER_ADDRESS);
     }
     
    
@@ -118,11 +116,6 @@ public abstract class BaseTest {
     protected static LocalHttpClient login(UserId userId, PlainPassword password) throws Exception {
 
     	return new LocalHttpClient(userId.get(), password.getPassword(), SERVER_ADDRESS);
-    }
-
-    protected static LocalHttpClient login_admin(UserId userId, PlainPassword password) throws Exception {
-
-    	return new LocalHttpClient(userId.get(), password.getPassword(), ADMIN_SERVER_ADDRESS);
     }
 
 	protected static class CauseMatcher extends TypeSafeMatcher<Throwable> {
