@@ -44,9 +44,7 @@ public class NewProjectTest extends BaseTest {
         assertThat(serverDocument.getHistoryFile(), is(notNullValue()));
         
         // Assert the remote change history
-			UserId managerId = f.getUserId("bob");
-			PlainPassword managerPassword = f.getPlainPassword("bob");
-			LocalHttpClient login = login(managerId, managerPassword);
+			LocalHttpClient login = client("bob");
 			login.setProjectId(projectId);
 			ChangeHistory remoteChangeHistory = login.getAllChanges(serverDocument);
         assertThat("The remote change history should be empty", remoteChangeHistory.isEmpty());

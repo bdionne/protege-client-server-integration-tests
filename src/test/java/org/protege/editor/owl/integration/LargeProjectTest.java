@@ -18,12 +18,6 @@ import static org.hamcrest.Matchers.notNullValue;
 
 public class LargeProjectTest extends BaseTest {
 	private ProjectId projectId;
-	
-	private LocalHttpClient getManager() throws Exception {
-    	UserId managerId = f.getUserId("bob");
-        PlainPassword managerPassword = f.getPlainPassword("bob");
-        return login(managerId, managerPassword);        
-    }
 
     @Test
     public void createLargeProject() throws Exception {
@@ -48,7 +42,7 @@ public class LargeProjectTest extends BaseTest {
         assertThat(serverDocument.getHistoryFile(), is(notNullValue()));
         
         // Assert the remote change history
-			LocalHttpClient manager = getManager();
+			LocalHttpClient manager = client("bob");
 			manager.setProjectId(projectId);
 			ChangeHistory remoteChangeHistory = manager.getAllChanges(serverDocument);
         assertThat("The remote change history should be empty", remoteChangeHistory.isEmpty());

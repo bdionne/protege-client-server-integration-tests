@@ -71,9 +71,7 @@ public class ConcurentCommitChangesTest extends BaseTest {
 	    }
 	    
 	    private VersionedOWLOntology openProjectAsManager() throws Exception {
-	    	UserId managerId = f.getUserId("bob");
-	        PlainPassword managerPassword = f.getPlainPassword("bob");
-	        this.manager = login(managerId, managerPassword);
+	        this.manager = client("bob");
 	        ServerDocument serverDocument = manager.openProject(projectId);
 	        return manager.buildVersionedOntology(serverDocument, owlManager, projectId);
 	    }

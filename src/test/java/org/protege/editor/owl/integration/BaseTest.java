@@ -83,6 +83,16 @@ public abstract class BaseTest {
     	
     }
 
+    public LocalHttpClient client(String user) {
+			UserId userId = f.getUserId(user);
+			PlainPassword password = f.getPlainPassword(user);
+			try {
+				return login(userId, password);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
     @Before
     public void connectToServer() throws Exception {
         UserId userId = f.getUserId("bob");

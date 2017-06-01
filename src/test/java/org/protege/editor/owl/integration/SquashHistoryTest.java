@@ -48,9 +48,7 @@ public class SquashHistoryTest extends BaseTest {
 	}
 
 	private VersionedOWLOntology openProjectAsManager() throws Exception {
-		UserId managerId = f.getUserId("bob");
-		PlainPassword managerPassword = f.getPlainPassword("bob");
-		client = login(managerId, managerPassword);
+		client = client("bob");
 		ServerDocument serverDocument = client.openProject(projectId);
 		return client.buildVersionedOntology(serverDocument, owlManager, projectId);
 	}
