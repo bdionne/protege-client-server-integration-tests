@@ -72,7 +72,7 @@ public class SquashHistoryTest extends BaseTest {
 		vont.update(client.commit(projectId, commitBundle));
 
 		ChangeHistory clientHistory = vont.getChangeHistory();
-		ChangeHistory serverHistory = client.getAllChanges(vont.getServerDocument());
+		ChangeHistory serverHistory = client.getAllChanges(vont.getServerDocument(), projectId);
 
 		assertThat(clientHistory.getHeadRevision(), is(R1));
 		assertThat(serverHistory.getHeadRevision(), is(R1));
@@ -81,7 +81,7 @@ public class SquashHistoryTest extends BaseTest {
 		SnapShot clientSnapShot = new SnapShot(ontology);
 		client.squashHistory(clientSnapShot, projectId);
 
-		serverHistory = client.getAllChanges(vont.getServerDocument());
+		serverHistory = client.getAllChanges(vont.getServerDocument(), projectId);
 
 		assertThat(serverHistory.getHeadRevision(), is(R0));
 

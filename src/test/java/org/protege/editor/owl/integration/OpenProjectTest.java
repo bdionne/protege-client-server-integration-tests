@@ -59,7 +59,7 @@ public class OpenProjectTest extends BaseTest {
         assertThat(changeHistoryFromClient.getMetadata().size(), is(0));
         assertThat(changeHistoryFromClient.getRevisions().size(), is(0));
         
-        ChangeHistory changeHistoryFromServer = ((LocalHttpClient) guest).getAllChanges(vont.getServerDocument());
+        ChangeHistory changeHistoryFromServer = ((LocalHttpClient) guest).getAllChanges(vont.getServerDocument(), projectId);
         
         // Assert the remote change history
         assertThat("The remote change history should be empty", changeHistoryFromServer.isEmpty());
