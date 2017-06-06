@@ -42,9 +42,8 @@ public class LargeProjectTest extends BaseTest {
         assertThat(serverDocument.getHistoryFile(), is(notNullValue()));
         
         // Assert the remote change history
-			LocalHttpClient manager = client("bob");
-			manager.setProjectId(projectId);
-			ChangeHistory remoteChangeHistory = manager.getAllChanges(serverDocument);
+        LocalHttpClient manager = client("bob");
+        ChangeHistory remoteChangeHistory = manager.getAllChanges(serverDocument, projectId);
         assertThat("The remote change history should be empty", remoteChangeHistory.isEmpty());
         assertThat(remoteChangeHistory.getBaseRevision(), is(R0));
         assertThat(remoteChangeHistory.getHeadRevision(), is(R0));
@@ -70,7 +69,7 @@ public class LargeProjectTest extends BaseTest {
         assertThat(changeHistoryFromClient.getMetadata().size(), is(0));
         assertThat(changeHistoryFromClient.getRevisions().size(), is(0));
         
-        ChangeHistory changeHistoryFromServer = ((LocalHttpClient) guest).getAllChanges(vont.getServerDocument());
+        ChangeHistory changeHistoryFromServer = ((LocalHttpClient) guest).getAllChanges(vont.getServerDocument(), projectId);
         
         // Assert the remote change history
         assertThat("The remote change history should be empty", changeHistoryFromServer.isEmpty());
