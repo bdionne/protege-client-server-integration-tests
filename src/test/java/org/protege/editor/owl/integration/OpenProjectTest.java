@@ -1,6 +1,6 @@
 package org.protege.editor.owl.integration;
 
-import edu.stanford.protege.metaproject.api.*;
+import edu.stanford.protege.metaproject.api.ProjectId;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,8 +11,6 @@ import org.protege.editor.owl.server.versioning.api.ServerDocument;
 import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
-
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -27,18 +25,7 @@ public class OpenProjectTest extends BaseTest {
 
     @Before
     public void createProject() throws Exception {
-        /*
-         * User inputs part
-         */
-        projectId = f.getProjectId("pizza-" + System.currentTimeMillis()); // currentTimeMilis() for uniqueness
-        Name projectName = f.getName("Pizza Project");
-        Description description = f.getDescription("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
-        UserId owner = f.getUserId("root");
-        Optional<ProjectOptions> options = Optional.ofNullable(null);
-        
-        Project proj = f.getProject(projectId, projectName, description, owner, options);
-       
-        getAdmin().createProject(proj, PizzaOntology.getResource());
+        projectId = createPizzaProject();
     }
 
     @Test
@@ -52,40 +39,27 @@ public class OpenProjectTest extends BaseTest {
         VersionedOWLOntology vont = guest.buildVersionedOntology(serverDocument, owlManager, projectId);
         ChangeHistory changeHistoryFromClient = vont.getChangeHistory();
         
-        // Assert the remote change history
-        assertThat("The local change history should be empty", changeHistoryFromClient.isEmpty());
-        assertThat(changeHistoryFromClient.getBaseRevision(), is(R0));
-        assertThat(changeHistoryFromClient.getHeadRevision(), is(R0));
-        assertThat(changeHistoryFromClient.getMetadata().size(), is(0));
-        assertThat(changeHistoryFromClient.getRevisions().size(), is(0));
-        
-        ChangeHistory changeHistoryFromServer = ((LocalHttpClient) guest).getAllChanges(vont.getServerDocument(), projectId);
-        
-        // Assert the remote change history
-        assertThat("The remote change history should be empty", changeHistoryFromServer.isEmpty());
-        assertThat(changeHistoryFromServer.getBaseRevision(), is(R0));
-        assertThat(changeHistoryFromServer.getHeadRevision(), is(R0));
-        assertThat(changeHistoryFromServer.getMetadata().size(), is(0));
-        assertThat(changeHistoryFromServer.getRevisions().size(), is(0));
+			Utils.assertChangeHistoryEmpty(changeHistoryFromClient, "The local change history should be empty");
+			ChangeHistory changeHistoryFromServer = guest.getAllChanges(vont.getServerDocument(), projectId);
+			Utils.assertChangeHistoryEmpty(changeHistoryFromServer, "The remote change history should be empty");
     }
 
-    @Test
+	@Test
     public void shouldConstructOntology() throws Exception {
         /*
          * Login as Guest
          */
-        Client guest = client("guest");
+        LocalHttpClient guest = client("guest");
         
         ServerDocument serverDocument = guest.openProject(projectId);
-        VersionedOWLOntology vont = ((LocalHttpClient) guest).buildVersionedOntology(serverDocument, owlManager, projectId);
-        OWLOntology ontology = vont.getOntology();
-        
-        // Assert the produced ontology
+        VersionedOWLOntology vont = guest.buildVersionedOntology(serverDocument, owlManager, projectId);
+
+		// Assert the produced ontology
         OWLOntology originalOntology = owlManager.getOntology(IRI.create(PizzaOntology.getId()));
-        assertThat(ontology, is(originalOntology));
-        assertThat(ontology.getSignature(), is(originalOntology.getSignature()));
-        assertThat(ontology.getAxiomCount(), is(originalOntology.getAxiomCount()));
-        assertThat(ontology.getAxioms(), is(originalOntology.getAxioms()));
+        assertThat(vont.getOntology(), is(originalOntology));
+        assertThat(vont.getOntology().getSignature(), is(originalOntology.getSignature()));
+        assertThat(vont.getOntology().getAxiomCount(), is(originalOntology.getAxiomCount()));
+        assertThat(vont.getOntology().getAxioms(), is(originalOntology.getAxioms()));
     }
 
     @After

@@ -1,25 +1,31 @@
 package org.protege.editor.owl.integration;
 
 import edu.stanford.protege.metaproject.ConfigurationManager;
-import edu.stanford.protege.metaproject.api.PlainPassword;
-import edu.stanford.protege.metaproject.api.PolicyFactory;
-import edu.stanford.protege.metaproject.api.UserId;
+import edu.stanford.protege.metaproject.api.*;
 import org.apache.log4j.BasicConfigurator;
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.protege.editor.owl.client.LocalHttpClient;
+import org.protege.editor.owl.client.api.exception.AuthorizationException;
+import org.protege.editor.owl.client.api.exception.ClientRequestException;
 import org.protege.editor.owl.model.history.HistoryManagerImpl;
 import org.protege.editor.owl.server.http.HTTPServer;
+import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLRuntimeException;
+import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
+import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
 
 public abstract class BaseTest {
 
@@ -32,6 +38,10 @@ public abstract class BaseTest {
     protected static final DocumentRevision R3 = DocumentRevision.create(3);
     protected static final DocumentRevision R4 = DocumentRevision.create(4);
     protected static final DocumentRevision R5 = DocumentRevision.create(5);
+
+	public static final String ONTOLOGY_ID = PizzaOntology.getId() + "#";
+	public static final OWLClass DOMAIN_CONCEPT = Class(IRI(ONTOLOGY_ID, "DomainConcept"));
+	public static final OWLClass CUSTOMER = Class(IRI(ONTOLOGY_ID, "Customer"));
 
     protected static PolicyFactory f = ConfigurationManager.getFactory();
 
@@ -84,7 +94,7 @@ public abstract class BaseTest {
 
     public LocalHttpClient client(String user) {
 			UserId userId = f.getUserId(user);
-			PlainPassword password = f.getPlainPassword("guest".equals(user) ? "guestpwd" : user);
+			PlainPassword password = f.getPlainPassword("guest".equals(user) || "root".equals(user) ? user + "pwd" : user);
 			try {
 				return login(userId, password);
 			} catch (Exception e) {
@@ -118,36 +128,32 @@ public abstract class BaseTest {
     	return new LocalHttpClient(userId.get(), password.getPassword(), SERVER_ADDRESS);
     }
 
-	protected static class CauseMatcher extends TypeSafeMatcher<Throwable> {
-        
-        private final Class<? extends Throwable> type;
-        private final String expectedMessage;
-     
-        public CauseMatcher(Class<? extends Throwable> type, String expectedMessage) {
-            this.type = type;
-            this.expectedMessage = expectedMessage;
-        }
-     
-        @Override
-        protected boolean matchesSafely(Throwable item) {
-            return item.getClass().isAssignableFrom(type)
-                    && item.getMessage().contains(expectedMessage);
-        }
-     
-        @Override
-        public void describeTo(Description description) {
-            description.appendText("expects type ")
-                    .appendValue(type)
-                    .appendText(" and a message ")
-                    .appendValue(expectedMessage);
-        }
-    }
-    
-
     @AfterClass
     public static void stopServer() throws Exception {
     	httpServer.stop();
-
     }
-    
+
+    protected ProjectId createPizzaProject() {
+			ProjectId projectId = f.getProjectId("pizza-" + System.currentTimeMillis()); // currentTimeMilis() for uniqueness
+			Name projectName = f.getName("Pizza Project");
+			Description description = f.getDescription("Pizza project! " + System.currentTimeMillis());
+			UserId owner = f.getUserId("bob");
+			Optional<ProjectOptions> options = Optional.ofNullable(null);
+
+			Project proj = f.getProject(projectId, projectName, description, owner, options);
+			try {
+				getAdmin().createProject(proj, PizzaOntology.getResource());
+			} catch (AuthorizationException | ClientRequestException e) {
+				throw new RuntimeException(e);
+			}
+			return projectId;
+		}
+
+	public static List<OWLOntologyChange> getOwlOntologyChanges(OWLOntology workingOntology) {
+		List<OWLOntologyChange> cs = new ArrayList<OWLOntologyChange>();
+		cs.add(new AddAxiom(workingOntology, Declaration(CUSTOMER)));
+		cs.add(new AddAxiom(workingOntology, SubClassOf(CUSTOMER, DOMAIN_CONCEPT)));
+		return cs;
+	}
+
 }

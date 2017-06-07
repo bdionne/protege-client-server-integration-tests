@@ -46,11 +46,7 @@ public class NewProjectTest extends BaseTest {
         // Assert the remote change history
         LocalHttpClient login = client("bob");
         ChangeHistory remoteChangeHistory = login.getAllChanges(serverDocument, projectId);
-        assertThat("The remote change history should be empty", remoteChangeHistory.isEmpty());
-        assertThat(remoteChangeHistory.getBaseRevision(), is(R0));
-        assertThat(remoteChangeHistory.getHeadRevision(), is(R0));
-        assertThat(remoteChangeHistory.getMetadata().size(), is(0));
-        assertThat(remoteChangeHistory.getRevisions().size(), is(0));
+        Utils.assertChangeHistoryEmpty(remoteChangeHistory, "The remote change history should be empty");
     }
 
     @After
