@@ -4,17 +4,11 @@ import edu.stanford.protege.metaproject.api.*;
 import org.junit.After;
 import org.junit.Test;
 import org.protege.editor.owl.client.LocalHttpClient;
-import org.protege.editor.owl.client.api.Client;
 import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.ServerDocument;
 import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
 
-import java.net.URI;
 import java.util.Optional;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 
 public class LargeProjectTest extends BaseTest {
 	private ProjectId projectId;
@@ -30,18 +24,9 @@ public class LargeProjectTest extends BaseTest {
 
 		Project proj = f.getProject(projectId, projectName, description, owner, options);
 
-		ServerDocument serverDocument = getAdmin().createProject(proj, LargeOntology.getResource());
+		ServerDocument serverDocument = getAdmin().createProject(proj, largeOntologyResource());
 
-
-		// Assert the server document
-		assertThat(serverDocument, is(notNullValue()));
-		assertThat(serverDocument.getServerAddress(), is(URI.create(SERVER_ADDRESS)));
-		assertThat(serverDocument.getHistoryFile(), is(notNullValue()));
-
-		// Assert the remote change history
-		LocalHttpClient manager = client("bob");
-		ChangeHistory remoteChangeHistory = manager.getAllChanges(serverDocument, projectId);
-		Utils.assertChangeHistoryEmpty(remoteChangeHistory, "The remote change history should be empty");
+		Utils.assertServerDocument(client("bob"), serverDocument, projectId);
 	}
 
 	@After

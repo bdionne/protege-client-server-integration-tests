@@ -37,9 +37,6 @@ public class CommitChangesTest extends BaseTest {
 
 	private ProjectId projectId;
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	@Before
 	public void createProject() throws Exception {
 		projectId = createPizzaProject();
@@ -55,30 +52,12 @@ public class CommitChangesTest extends BaseTest {
 		LocalHttpClient client = client("bob");
 		VersionedOWLOntology vont = openProjectAsManager(client);
 
-        /*
-				 * Simulates user edits over a working ontology (add axioms)
-         */
 		List<OWLOntologyChange> cs = getOwlOntologyChanges(vont.getOntology());
-
 		owlManager.applyChanges(cs);
-
 		histManager.logChanges(cs);
-        
-        
-        
-        /*
-         * Prepare the commit bundle
-         */
+
 		CommitBundle commitBundle = commitBundle(getAdmin(), vont, "Add customer subclass of domain concept");
-        
-        /*
-         * Do commit
-         */
 		ChangeHistory approvedChanges = client.commit(projectId, commitBundle);
-        
-        /*
-         * Update local history
-         */
 		vont.update(approvedChanges);
 
 		assertThat("The local change history should not be empty", !vont.getChangeHistory().isEmpty());
@@ -86,17 +65,14 @@ public class CommitChangesTest extends BaseTest {
 			"The local change history should not be empty", 2);
 		ChangeHistory changeHistoryFromServer = client.getAllChanges(vont.getServerDocument(), projectId);
 		Utils.assertChangeHistoryNotEmpty(changeHistoryFromServer,
-			"The remote change history should not be empty", 2 );
+			"The remote change history should not be empty", 2);
 	}
 
 	@Test
 	public void shouldCommitDeletion() throws Exception {
 		LocalHttpClient client = client("bob");
 		VersionedOWLOntology vont = openProjectAsManager(client);
-        
-        /*
-         * Simulates user edits over a working ontology (remove a class and its references)
-         */
+
 		Set<OWLAxiom> axiomsToRemove = new HashSet<>();
 		for (OWLAxiom ax : vont.getOntology().getAxioms()) {
 			if (ax.getSignature().contains(MEAT_TOPPING)) {
@@ -123,19 +99,8 @@ public class CommitChangesTest extends BaseTest {
 		}
 
 		histManager.logChanges(cs);
-        
-        /*
-         * Prepare the commit bundle
-         */
 		CommitBundle commitBundle = commitBundle(getAdmin(), vont, "Remove MeatTopping and its references");
-        /*
-         * Do commit
-         */
 		ChangeHistory approvedChanges = client.commit(projectId, commitBundle);
-        
-        /*
-         * Update local history
-         */
 		vont.update(approvedChanges);
 
 		Utils.assertChangeHistoryNotEmpty(vont.getChangeHistory(), "The local change history should not be empty", 16);
@@ -143,35 +108,19 @@ public class CommitChangesTest extends BaseTest {
 		Utils.assertChangeHistoryNotEmpty(changeHistoryFromServer, "The remote change history should not be empty", 16);
 	}
 
-	@Test
+	@Test(expected = ClientRequestException.class)
 	public void shouldNotCommitChange() throws Exception {
 		LocalHttpClient guest = client("guest");
 		ServerDocument serverDocument = guest.openProject(projectId);
 		VersionedOWLOntology vont = guest.buildVersionedOntology(serverDocument, owlManager, projectId);
 		OWLOntology workingOntology = vont.getOntology();
-        
-        /*
-         * Simulates user edits over a working ontology (add axioms)
-         */
+
 		List<OWLOntologyChange> cs = getOwlOntologyChanges(workingOntology);
-
 		owlManager.applyChanges(cs);
-
 		histManager.logChanges(cs);
-       
-        
-        /*
-         * Prepare the commit bundle
-         */
-		CommitBundle commitBundle = commitBundle(guest, vont,"Add customer subclass of domain concept");
 
-		thrown.expect(ClientRequestException.class);
-		//thrown.expectCause(new CauseMatcher(OperationNotAllowedException.class,
-		// "User has no permission for 'Add axiom' operation"));
-        
-        /*
-         * Do commit
-         */
+		CommitBundle commitBundle = commitBundle(guest, vont, "Add customer subclass of domain concept");
+
 		guest.commit(projectId, commitBundle);
 	}
 
