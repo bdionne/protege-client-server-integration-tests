@@ -37,9 +37,6 @@ public class CommitChangesTest extends BaseTest {
 
 	private ProjectId projectId;
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	@Before
 	public void createProject() throws Exception {
 		projectId = createPizzaProject();
@@ -111,7 +108,7 @@ public class CommitChangesTest extends BaseTest {
 		Utils.assertChangeHistoryNotEmpty(changeHistoryFromServer, "The remote change history should not be empty", 16);
 	}
 
-	@Test
+	@Test(expected = ClientRequestException.class)
 	public void shouldNotCommitChange() throws Exception {
 		LocalHttpClient guest = client("guest");
 		ServerDocument serverDocument = guest.openProject(projectId);
@@ -124,7 +121,6 @@ public class CommitChangesTest extends BaseTest {
 
 		CommitBundle commitBundle = commitBundle(guest, vont, "Add customer subclass of domain concept");
 
-		thrown.expect(ClientRequestException.class);
 		guest.commit(projectId, commitBundle);
 	}
 

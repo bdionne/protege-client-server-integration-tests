@@ -24,9 +24,6 @@ public class NewProjectTest extends BaseTest {
 
     @Test
     public void createNewProject() throws Exception {
-        /*
-         * [GUI] The input project properties
-         */
         projectId = f.getProjectId("pizza-" + System.currentTimeMillis()); // currentTimeMilis() for uniqueness
         Name projectName = f.getName("Pizza Project");
         Description description = f.getDescription("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
