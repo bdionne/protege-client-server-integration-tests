@@ -43,7 +43,7 @@ public class CommitChangesTest extends BaseTest {
 	}
 
 	private VersionedOWLOntology openProjectAsManager(LocalHttpClient client) throws Exception {
-		ServerDocument serverDocument = client.openProject(projectId);
+		ServerDocument serverDocument = client.openProject(projectId).serverDocument;
 		return client.buildVersionedOntology(serverDocument, owlManager, projectId);
 	}
 
@@ -111,7 +111,7 @@ public class CommitChangesTest extends BaseTest {
 	@Test(expected = ClientRequestException.class)
 	public void shouldNotCommitChange() throws Exception {
 		LocalHttpClient guest = client("guest");
-		ServerDocument serverDocument = guest.openProject(projectId);
+		ServerDocument serverDocument = guest.openProject(projectId).serverDocument;
 		VersionedOWLOntology vont = guest.buildVersionedOntology(serverDocument, owlManager, projectId);
 		OWLOntology workingOntology = vont.getOntology();
 

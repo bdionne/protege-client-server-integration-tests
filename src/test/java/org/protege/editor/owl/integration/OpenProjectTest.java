@@ -31,7 +31,7 @@ public class OpenProjectTest extends BaseTest {
 	public void shouldDownloadRemoteChanges() throws Exception {
 		LocalHttpClient guest = client("guest");
 
-		ServerDocument serverDocument = guest.openProject(projectId);
+		ServerDocument serverDocument = guest.openProject(projectId).serverDocument;
 		VersionedOWLOntology vont = guest.buildVersionedOntology(serverDocument, owlManager, projectId);
 		ChangeHistory changeHistoryFromClient = vont.getChangeHistory();
 
@@ -44,7 +44,7 @@ public class OpenProjectTest extends BaseTest {
 	public void shouldConstructOntology() throws Exception {
 		LocalHttpClient guest = client("guest");
 
-		ServerDocument serverDocument = guest.openProject(projectId);
+		ServerDocument serverDocument = guest.openProject(projectId).serverDocument;
 		VersionedOWLOntology vont = guest.buildVersionedOntology(serverDocument, owlManager, projectId);
 
 		OWLOntology originalOntology = owlManager.getOntology(IRI.create(PizzaOntology.getId()));

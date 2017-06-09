@@ -62,7 +62,7 @@ public class PauseServerTest extends BaseTest {
 		assertThat(nonManager.isWorkFlowManager(projectId), is(false));
 		pauser.pauseServer();
 		try {
-			ServerDocument serverDocument = nonManager.openProject(projectId);
+			ServerDocument serverDocument = nonManager.openProject(projectId).serverDocument;
 			final VersionedOWLOntology vont = nonManager.buildVersionedOntology(serverDocument, owlManager, projectId);
 			nonManager.getLatestChanges(vont, projectId);
 		} finally {
@@ -87,7 +87,7 @@ public class PauseServerTest extends BaseTest {
 		final LocalHttpClient committer = client(committerName);
 		pauser.pauseServer();
 		try {
-			ServerDocument serverDocument = committer.openProject(projectId);
+			ServerDocument serverDocument = committer.openProject(projectId).serverDocument;
 			VersionedOWLOntology vont = committer.buildVersionedOntology(serverDocument, owlManager, projectId);
 			List<OWLOntologyChange> cs = getOwlOntologyChanges(vont.getOntology());
 
