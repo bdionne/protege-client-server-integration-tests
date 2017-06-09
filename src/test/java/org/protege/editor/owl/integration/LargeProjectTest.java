@@ -32,13 +32,7 @@ public class LargeProjectTest extends BaseTest {
 
 		ServerDocument serverDocument = getAdmin().createProject(proj, LargeOntology.getResource());
 
-		assertThat(serverDocument, is(notNullValue()));
-		assertThat(serverDocument.getServerAddress(), is(URI.create(SERVER_ADDRESS)));
-		assertThat(serverDocument.getHistoryFile(), is(notNullValue()));
-
-		LocalHttpClient manager = client("bob");
-		ChangeHistory remoteChangeHistory = manager.getAllChanges(serverDocument, projectId);
-		Utils.assertChangeHistoryEmpty(remoteChangeHistory, "The remote change history should be empty");
+		Utils.assertServerDocument(client("bob"), serverDocument, projectId);
 	}
 
 	@After
