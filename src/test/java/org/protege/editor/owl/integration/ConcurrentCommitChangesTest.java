@@ -35,7 +35,7 @@ public class ConcurrentCommitChangesTest extends BaseTest {
 	@Test
 	public void shouldCommitAddition() throws Exception {
 		LocalHttpClient manager = client("bob");
-		ServerDocument serverDocument = manager.openProject(projectId);
+		ServerDocument serverDocument = manager.openProject(projectId).serverDocument;
 		VersionedOWLOntology vont = manager.buildVersionedOntology(serverDocument, owlManager, projectId);
 
 		List<OWLOntologyChange> cs = getOwlOntologyChanges(vont.getOntology());

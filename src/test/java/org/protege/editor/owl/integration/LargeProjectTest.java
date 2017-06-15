@@ -33,7 +33,7 @@ public class LargeProjectTest extends BaseTest {
 	public void shouldDownloadRemoteChanges() throws Exception {
 		LocalHttpClient guest = client("guest");
 
-		ServerDocument serverDocument = guest.openProject(projectId);
+		ServerDocument serverDocument = guest.openProject(projectId).serverDocument;
 		VersionedOWLOntology vont = guest.buildVersionedOntology(serverDocument, owlManager, projectId);
 		Utils.assertChangeHistoryEmpty(vont.getChangeHistory(), "The local change history should be empty");
 		ChangeHistory changeHistoryFromServer = guest.getAllChanges(vont.getServerDocument(), projectId);

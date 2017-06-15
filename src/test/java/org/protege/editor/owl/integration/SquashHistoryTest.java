@@ -34,7 +34,7 @@ public class SquashHistoryTest extends BaseTest {
 	@Test
 	public void shouldSquashHistory() throws Exception {
 		LocalHttpClient client = client("bob");
-		ServerDocument serverDocument = client.openProject(projectId);
+		ServerDocument serverDocument = client.openProject(projectId).serverDocument;
 		VersionedOWLOntology vont = client.buildVersionedOntology(serverDocument, owlManager, projectId);
 
 		List<OWLOntologyChange> cs = getOwlOntologyChanges(vont.getOntology());
