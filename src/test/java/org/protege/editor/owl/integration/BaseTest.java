@@ -15,11 +15,12 @@ import org.protege.editor.owl.server.versioning.api.DocumentRevision;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
+import com.google.common.base.Optional;
+
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Class;
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.*;
@@ -111,7 +112,7 @@ public abstract class BaseTest {
 		Name projectName = f.getName("Pizza Project");
 		Description description = f.getDescription("Pizza project! " + System.currentTimeMillis());
 		UserId owner = f.getUserId("bob");
-		Optional<ProjectOptions> options = Optional.ofNullable(null);
+		Optional<ProjectOptions> options = Optional.absent();
 
 		Project proj = f.getProject(projectId, projectName, description, owner, options);
 		try {
