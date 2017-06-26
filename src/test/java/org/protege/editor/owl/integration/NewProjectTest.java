@@ -5,11 +5,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.protege.editor.owl.server.versioning.api.ServerDocument;
 
-import java.util.Optional;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import com.google.common.base.Optional;
 
 /**
  * @author Josef Hardi <johardi@stanford.edu> <br>
@@ -26,7 +22,7 @@ public class NewProjectTest extends BaseTest {
 		Description description = f.getDescription("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 		UserId owner = f.getUserId("root");
 
-		Optional<ProjectOptions> options = Optional.ofNullable(null);
+		Optional<ProjectOptions> options = Optional.absent();
 
 		Project proj = f.getProject(projectId, projectName, description, owner, options);
 

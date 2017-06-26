@@ -8,7 +8,7 @@ import org.protege.editor.owl.server.versioning.api.ChangeHistory;
 import org.protege.editor.owl.server.versioning.api.ServerDocument;
 import org.protege.editor.owl.server.versioning.api.VersionedOWLOntology;
 
-import java.util.Optional;
+import com.google.common.base.Optional;
 
 public class LargeProjectTest extends BaseTest {
 	private ProjectId projectId;
@@ -20,7 +20,7 @@ public class LargeProjectTest extends BaseTest {
 		Description description = f.getDescription("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
 		UserId owner = f.getUserId("root");
 
-		Optional<ProjectOptions> options = Optional.ofNullable(null);
+		Optional<ProjectOptions> options = Optional.absent();
 
 		Project proj = f.getProject(projectId, projectName, description, owner, options);
 
